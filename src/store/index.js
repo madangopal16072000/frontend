@@ -1,23 +1,13 @@
-// import { createStore, combineReducers, applyMiddleware } from "redux";
-// import thunk from "redux-thunk";
-// import { composeWithDevtools } from "redux-devtools-extension";
-
-// const reducer = combineReducers({});
-
-// let initialState = {};
-// const middleware = { thunk };
-// const store = createStore(
-//   reducer,
-//   initialState,
-//   composeWithDevtools(applyMiddleware(...middleware))
-// );
-
 import { configureStore } from "@reduxjs/toolkit";
+import apiSlice from "../api/apiSlice";
 import productsReducer from "./productSlice";
 export const store = configureStore({
   reducer: {
     products: productsReducer,
+    [apiSlice.reducerPath]: apiSlice.reducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(apiSlice.middleware),
 });
 
 export default store;

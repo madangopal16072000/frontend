@@ -1,16 +1,16 @@
 import { CgMouse } from "react-icons/cg";
-import Product from "./Product";
+import ProductCard from "./ProductCard";
 import "./Home.css";
-import MetaData from "./layout/MetaData";
+import MetaData from "../layout/MetaData";
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchProducts,
   getProductsError,
   getProductsStatus,
   selectAllProducts,
-} from "../store/productSlice";
+} from "../../store/productSlice";
 import { useEffect } from "react";
-import Loader from "./Loader";
+import Loader from "../Loader";
 
 const product = {
   name: "Blue Tshirt",
@@ -24,7 +24,8 @@ const product = {
 };
 function Home() {
   const dispatch = useDispatch();
-  const products = useSelector(selectAllProducts);
+  const productsData = useSelector(selectAllProducts);
+  const products = productsData.products;
   const status = useSelector(getProductsStatus);
   const error = useSelector(getProductsError);
 
@@ -34,6 +35,7 @@ function Home() {
     }
 
     if (status === "idle") {
+      console.log("entered");
       dispatch(fetchProducts());
     }
   }, [status, dispatch, error]);
@@ -58,7 +60,7 @@ function Home() {
           <div className="container" id="container">
             {products &&
               products.map((product) => {
-                return <Product product={product} />;
+                return <ProductCard product={product} />;
               })}
           </div>
         </>

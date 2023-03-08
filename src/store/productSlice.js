@@ -1,17 +1,33 @@
-import { createSlice, nanoid, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const PRODUCTS_URL = "api/v1/products";
+// const PRODUCTS_URL = "api/v1/products";
 const initialState = {
-  products: [],
+  products: {
+    products: [],
+    productsCount: 0,
+    resultPerPage: 0,
+    filteredProductsCount: 0,
+  },
   status: "idle",
   error: null,
 };
 
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
-  async () => {
-    const response = await axios.get(PRODUCTS_URL);
+  async (Args = {}) => {
+    const keyword = Args.keyword ? Args.keyword : "";
+    const currentPage = Args.currentPage ? Args.currentPage : 1;
+    const price = Args.price ? Args.price : [0, 25000];
+    const category = Args.category ? Args.category : "";
+    const ratings = Args.rating ? Args.rating : 0;
+
+    let link = `/api/v1/products?page=${currentPage}&keyword=${keyword}&price[gte]=${price[0]}&price[lte]=${price[1]}&ratings[gte]=${ratings}`;
+    if (category) {
+      link = `/api/v1/products?page=${currentPage}&keyword=${keyword}&price[gte]=${price[0]}&price[lte]=${price[1]}&ratings[gte]=${ratings}&category=${category}`;
+    }
+    const response = await axios.get(link);
+
     return response.data;
   }
 );
@@ -42,7 +58,14 @@ const productSlice = createSlice({
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.status = "succeeded";
         // Add any fetched products to the array
-        state.products = state.products.concat(action.payload.products);
+        // state.products.products = state.products.products.concat(
+        //   action.payload.products
+        // );
+        state.products.products = action.payload.products;
+        state.products.productsCount = action.payload.productCount;
+        state.products.resultPerPage = action.payload.resultPerPage;
+        state.products.filteredProductsCount =
+          action.payload.filteredProductsCount;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.status = "failed";
@@ -69,7 +92,7 @@ export const getProductsStatus = (state) => state.products.status;
 export const getProductsError = (state) => state.products.error;
 
 export const getSingleProduct = (state, productId) => {
-  return state.products.products.find((product) => {
+  return state.products.products.products.find((product) => {
     return product._id === productId;
   });
 };
